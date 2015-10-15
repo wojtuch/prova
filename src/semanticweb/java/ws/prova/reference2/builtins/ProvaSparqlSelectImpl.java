@@ -67,7 +67,7 @@ public class ProvaSparqlSelectImpl extends ProvaSparqlQueryImpl {
 				log.debug("Exception: ", e);
 			return false;
 		}
-
+		
 		// Evaluate TupleQuery.
 		TupleQueryResult result;
 		try {
@@ -83,12 +83,15 @@ public class ProvaSparqlSelectImpl extends ProvaSparqlQueryImpl {
 			// For each result in the result set, add a fact to the KB.
 			while(result.hasNext()) {
 				List<ProvaObject> newterms = new ArrayList<ProvaObject>();
-				Iterator<Binding> it = result.next().iterator();
-				while(it.hasNext()) {
-					Binding b = it.next();
-					// TODO Handle different data types.
-					String val = b.getValue().stringValue();
-					newterms.add(ProvaConstantImpl.create(val));
+				List<String> bindingNames = result.getBindingNames();
+				BindingSet bindingSet = result.next();
+				for (String s : bindingNames) {
+					Binding b = bindingSet.getBinding(s);
+					String bindingValue = "";
+					if (b != null) {
+						bindingValue = b.getValue().stringValue();
+					}
+					newterms.add(ProvaConstantImpl.create(bindingValue));
 				}
 				
 				// Create the sparql_results predicate, but only once.
